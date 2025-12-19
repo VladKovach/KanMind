@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -13,6 +13,8 @@ from .serializers import (
     UserSerializer,
 )
 
+User = get_user_model()
+
 
 class RegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -25,7 +27,7 @@ class RegistrationView(APIView):
             return Response(
                 {
                     "token": token.key,
-                    "fullname": user.username,
+                    "fullname": user.fullname,
                     "email": user.email,
                     "user_id": user.id,
                 },
@@ -45,7 +47,7 @@ class LoginView(APIView):
             return Response(
                 {
                     "token": token.key,
-                    "fullname": user.username,
+                    "fullname": user.fullname,
                     "email": user.email,
                     "user_id": user.id,
                 }

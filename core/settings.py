@@ -123,3 +123,6 @@ STATIC_URL = "static/"
 #         "rest_framework.permissions.IsAuthenticated",
 #     ]
 # }
+
+
+AUTH_USER_MODEL = "kanmind_app.User"
