@@ -35,3 +35,36 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+# Boards Models
+
+
+class Board(models.Model):
+    owner = models.ForeignKey(
+        User,
+        related_name="owned_boards",
+        on_delete=models.CASCADE,
+    )
+
+    title = models.CharField(max_length=255)
+
+    members = models.ManyToManyField(
+        User,
+        related_name="member_boards",
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "title"],
+                name="unique_board_per_owner",
+            )
+        ]
+
+    def __str__(self):
+        return self.title
