@@ -1,13 +1,15 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 
+from kanmind_app.models import Board, Task
+
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "fullname", "email"]
+        fields = ["id", "email", "fullname"]
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -56,3 +58,105 @@ class LoginSerializer(serializers.Serializer):
 
         attrs["user"] = user
         return attrs
+
+
+class BoardListSerializer(serializers.ModelSerializer):
+    """
+    Serializer description
+    """
+
+    owner_id = serializers.IntegerField(source="owner.id", read_only=True)
+    members = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all(), write_only=True
+    )
+    member_count = serializers.SerializerMethodField()
+    ticket_count = serializers.SerializerMethodField()
+    tasks_to_do_count = serializers.SerializerMethodField()
+    tasks_high_prio_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Board
+        fields = [
+            "id",
+            "title",
+            "members",
+            "member_count",
+            "ticket_count",
+            "tasks_to_do_count",
+            "tasks_high_prio_count",
+            "owner_id",
+        ]
+
+    def validate(self, attrs):
+        owner = self.context["request"].user
+        title = attrs.get("title")
+
+        if Board.objects.filter(owner=owner, title=title).exists():
+            raise serializers.ValidationError(
+                {
+                    "detail": f"Owner {owner.id} already has a board with title '{title}'."
+                }
+            )
+        return attrs
+
+    def get_member_count(self, obj):
+        return obj.members.count()
+
+    def get_ticket_count(self, obj):
+        return obj.tasks.count()
+
+    def get_tasks_to_do_count(self, obj):
+        return obj.tasks.filter(status="todo").count()
+
+    def get_tasks_high_prio_count(self, obj):
+        return obj.tasks.filter(priority="high").count()
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    """
+    Serializer description
+    """
+
+    assignee = UserSerializer(read_only=True)
+    reviewer = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Task
+        fields = "__all__"
+
+
+class BoardDetailSerializer(serializers.ModelSerializer):
+
+    owner_id = serializers.IntegerField(source="owner.id", read_only=True)
+    members = UserSerializer(many=True, read_only=True)
+    tasks = TaskSerializer(many=True, read_only=True)
+
+    def validate(self, attrs):
+        owner = self.context["request"].user
+        title = attrs.get("title")
+
+        if title:  # Only validate if title is provided (PATCH might omit it)
+            queryset = Board.objects.filter(owner=owner, title=title)
+
+            # Exclude current instance on updates (PUT/PATCH)
+            if self.instance:
+                queryset = queryset.exclude(pk=self.instance.pk)
+
+            if queryset.exists():
+                raise serializers.ValidationError(
+                    {
+                        "title": f"Owner {owner.id} already has a board with title '{title}'."
+                    }
+                )
+
+        return attrs
+
+    class Meta:
+        model = Board
+        fields = [
+            "id",
+            "title",
+            "owner_id",
+            "members",
+            "tasks",
+        ]

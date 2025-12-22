@@ -68,3 +68,23 @@ class Board(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Task(models.Model):
+    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name="tasks")
+    description = models.TextField()
+    status = models.CharField()
+    priority = models.CharField()
+    assignee = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="assigned_tasks"
+    )
+    reviewer = models.ForeignKey(
+        User, related_name="review_tasks", on_delete=models.CASCADE
+    )
+    due_date = models.DateField()
+
+
+class Comment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
+    content = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
