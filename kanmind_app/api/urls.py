@@ -3,6 +3,7 @@ from django.urls import path
 from kanmind_app.api.views import (
     BoardDetailView,
     BoardListCreateView,
+    EmailCheckView,
     LoginView,
     RegistrationView,
     TaskDetailView,
@@ -18,9 +19,9 @@ urlpatterns = [
     path("boards/<int:pk>", BoardDetailView.as_view(), name="boards-list"),
     path("tasks/", TaskListCreateView.as_view(), name="tasks-list"),
     path("tasks/<int:pk>", TaskDetailView.as_view(), name="tasks-detail"),
+    path("email-check/", EmailCheckView.as_view(), name="email-check"),
     # path("boards/"),
     # path("boards/<int:pk>/"),
-    # path("email-check/"),
     # path("tasks/"),
     # path("tasks/<int:pk>/"),
     # path("tasks/reviewing/"),

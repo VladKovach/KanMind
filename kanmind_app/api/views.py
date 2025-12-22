@@ -1,10 +1,15 @@
+from asyncio.windows_events import NULL
+
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.http import Http404
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import (
     ListAPIView,
     ListCreateAPIView,
+    RetrieveAPIView,
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import AllowAny
@@ -17,6 +22,7 @@ from kanmind_app.models import Board, Task
 from .serializers import (
     BoardDetailSerializer,
     BoardListSerializer,
+    EmailFilterSerializer,
     LoginSerializer,
     RegistrationSerializer,
     TaskSerializer,
@@ -99,3 +105,27 @@ class TaskListCreateView(ListCreateAPIView):
 class TaskDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+
+
+# Email Check
+class EmailCheckView(ListAPIView):
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        # Validate ALL query params at once
+        filter_serializer = EmailFilterSerializer(data=self.request.query_params)
+        filter_serializer.is_valid(raise_exception=True)
+
+        email = filter_serializer.validated_data["email"]
+        return User.objects.filter(email__iexact=email)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # 404 if no user found
+        if not queryset.exists():
+            raise NotFound("Email nicht gefunden. Die Email existiert nicht.")
+
+        # Serialize the single user
+        serializer = self.get_serializer(queryset.first())
+        return Response(serializer.data)
