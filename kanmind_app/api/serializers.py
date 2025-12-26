@@ -113,16 +113,51 @@ class BoardListSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    """
-    Serializer description
-    """
+    # IDs for write
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        source="assignee",
+        queryset=User.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+    reviewer_id = serializers.PrimaryKeyRelatedField(
+        source="reviewer",
+        queryset=User.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
 
-    assignee = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    reviewer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    # Nested users for read
+    assignee = UserSerializer(read_only=True)
+    reviewer = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Task
+        fields = [
+            "id",
+            "title",
+            "description",
+            "status",
+            "priority",
+            "due_date",
+            "board",
+            "assignee_id",
+            "reviewer_id",
+            "assignee",
+            "reviewer",
+        ]
+
+
+class TaskDetailSerializer(TaskSerializer):
 
     class Meta:
         model = Task
         fields = "__all__"
+        read_only_fields = [
+            "board"
+        ]  # in Aufgabe steht gar kein board , aber read oonly geht glaube ich um zu versehen
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):

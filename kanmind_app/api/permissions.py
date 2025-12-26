@@ -18,8 +18,18 @@ class IsBoardMember(BasePermission):
 
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
+
             return True
         else:
+            board_id = request.data.get("board")
+            if (
+                board_id is None
+                and request.method != "PUT"
+                and request.method != "PATCH"
+            ):
+                return True  # to allow serializer handle errors
+
             return Board.objects.filter(
-                Q(owner=request.user) | Q(members=request.user)
+                Q(id=board_id),
+                Q(owner=request.user) | Q(members=request.user),
             ).exists()

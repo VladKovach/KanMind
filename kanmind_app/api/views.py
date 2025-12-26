@@ -25,6 +25,7 @@ from .serializers import (
     EmailFilterSerializer,
     LoginSerializer,
     RegistrationSerializer,
+    TaskDetailSerializer,
     TaskSerializer,
     UserSerializer,
 )
@@ -105,7 +106,7 @@ class TaskListCreateView(ListCreateAPIView):
 
 class TaskDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    serializer_class = TaskDetailSerializer
     permission_classes = [IsBoardMember]
 
 
@@ -131,3 +132,17 @@ class EmailCheckView(ListAPIView):
         # Serialize the single user
         serializer = self.get_serializer(queryset.first())
         return Response(serializer.data)
+
+
+class AssignedToUserTasksView(ListAPIView):
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        return Task.objects.filter(assignee=self.request.user)
+
+
+class UserIsReviewingTasksView(ListAPIView):
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        return Task.objects.filter(reviewer=self.request.user)
