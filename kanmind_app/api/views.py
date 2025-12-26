@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from kanmind_app.api.permissions import IsOwnerOrMember
+from kanmind_app.api.permissions import IsBoardMember, IsOwnerOrMember
 from kanmind_app.models import Board, Task
 
 from .serializers import (
@@ -100,11 +100,13 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
 class TaskListCreateView(ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    permission_classes = [IsBoardMember]
 
 
 class TaskDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    permission_classes = [IsBoardMember]
 
 
 # Email Check

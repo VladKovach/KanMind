@@ -117,8 +117,8 @@ class TaskSerializer(serializers.ModelSerializer):
     Serializer description
     """
 
-    assignee = UserSerializer(read_only=True)
-    reviewer = UserSerializer(read_only=True)
+    assignee = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    reviewer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = Task
