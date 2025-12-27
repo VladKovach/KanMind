@@ -128,7 +128,7 @@ class TaskSerializer(serializers.ModelSerializer):
         allow_null=True,
         write_only=True,
     )
-
+    created_by = UserSerializer(read_only=True)
     # Nested users for read
     assignee = UserSerializer(read_only=True)
     reviewer = UserSerializer(read_only=True)
@@ -147,7 +147,9 @@ class TaskSerializer(serializers.ModelSerializer):
             "reviewer_id",
             "assignee",
             "reviewer",
+            "created_by",
         ]
+        read_only_fields = ["created_by"]
 
 
 class TaskDetailSerializer(TaskSerializer):

@@ -109,6 +109,11 @@ class Task(models.Model):
         blank=True,
         null=True,
     )
+    created_by = models.ForeignKey(
+        User,
+        related_name="created_tasks",
+        on_delete=models.CASCADE,
+    )
 
 
 class Comment(models.Model):
