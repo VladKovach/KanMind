@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 
-from kanmind_app.models import Board, Task
+from kanmind_app.models import Board, Comment, Task
 
 User = get_user_model()
 
@@ -203,3 +203,14 @@ class BoardDetailSerializer(serializers.ModelSerializer):
 
 class EmailFilterSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+# Comments
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
+        read_only_fields = ["author", "task"]

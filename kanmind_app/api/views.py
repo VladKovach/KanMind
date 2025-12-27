@@ -3,10 +3,12 @@ from asyncio.windows_events import NULL
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.http import Http404
+from django.tasks import task
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import (
+    DestroyAPIView,
     ListAPIView,
     ListCreateAPIView,
     RetrieveAPIView,
@@ -21,11 +23,12 @@ from kanmind_app.api.permissions import (
     IsBoardOwnerOrMember,
     IsTaskCreatorOrBoardOwnerOrBoardMember,
 )
-from kanmind_app.models import Board, Task
+from kanmind_app.models import Board, Comment, Task
 
 from .serializers import (
     BoardDetailSerializer,
     BoardListSerializer,
+    CommentSerializer,
     EmailFilterSerializer,
     LoginSerializer,
     RegistrationSerializer,
@@ -97,6 +100,7 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Board.objects.all()
     serializer_class = BoardDetailSerializer
     permission_classes = [IsBoardOwnerOrMember]
+    lookup_url_kwarg = "board_id"
 
 
 # Tasks
@@ -115,6 +119,7 @@ class TaskDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskDetailSerializer
     permission_classes = [IsBoardMember and IsTaskCreatorOrBoardOwnerOrBoardMember]
+    lookup_url_kwarg = "task_id"
 
 
 # Email Check
@@ -153,3 +158,25 @@ class UserIsReviewingTasksView(ListAPIView):
 
     def get_queryset(self):
         return Task.objects.filter(reviewer=self.request.user)
+
+
+# Comments
+
+
+class CommentsListCreateView(ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        print("self.kwargs = ", self.kwargs)
+        task_id = self.kwargs["task_id"]
+        return Comment.objects.filter(task_id=task_id)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentsDetailView(DestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    lookup_url_kwarg = "comment_id"
