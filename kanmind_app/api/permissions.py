@@ -1,10 +1,10 @@
 from django.db.models import Q
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
-from kanmind_app.models import Board
+from kanmind_app.models import Board, Task
 
 
-class IsBoardMember(BasePermission):
+class IsBoardMemberForBoards(BasePermission):
 
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
@@ -40,3 +40,27 @@ class IsTaskCreatorOrBoardOwnerOrBoardMember(BasePermission):
 
         # any board member or owner can view/update:
         return obj.board.owner == user or obj.board.members.filter(pk=user.pk).exists()
+
+
+class IsBoardMemberForTaskComments(BasePermission):
+
+    def has_permission(self, request, view):
+        task_id = view.kwargs.get("task_id")
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return False
+
+        board = task.board
+        return (
+            board.owner == request.user
+            or board.members.filter(pk=request.user.pk).exists()
+        )
+
+
+class IsCommentAuthor(BasePermission):
+    def has_object_permission(self, request, view, obj):
+
+        print("obj.author = ", obj.author)
+        print("request.user = ", request.user)
+        return obj.author == request.user

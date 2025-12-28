@@ -19,8 +19,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from kanmind_app.api.permissions import (
-    IsBoardMember,
+    IsBoardMemberForBoards,
+    IsBoardMemberForTaskComments,
     IsBoardOwnerOrMember,
+    IsCommentAuthor,
     IsTaskCreatorOrBoardOwnerOrBoardMember,
 )
 from kanmind_app.models import Board, Comment, Task
@@ -90,6 +92,7 @@ class BoardListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+
         return Board.objects.filter(Q(owner=user) | Q(members=user)).distinct()
 
     def perform_create(self, serializer):
@@ -109,7 +112,7 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
 class TaskListCreateView(ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsBoardMember]
+    permission_classes = [IsBoardMemberForBoards]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -118,7 +121,7 @@ class TaskListCreateView(ListCreateAPIView):
 class TaskDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskDetailSerializer
-    permission_classes = [IsBoardMember and IsTaskCreatorOrBoardOwnerOrBoardMember]
+    permission_classes = [IsTaskCreatorOrBoardOwnerOrBoardMember]
     lookup_url_kwarg = "task_id"
 
 
@@ -166,17 +169,20 @@ class UserIsReviewingTasksView(ListAPIView):
 class CommentsListCreateView(ListCreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [IsBoardMemberForTaskComments]
 
     def get_queryset(self):
-        print("self.kwargs = ", self.kwargs)
         task_id = self.kwargs["task_id"]
         return Comment.objects.filter(task_id=task_id)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        task_id = self.kwargs["task_id"]
+        task = Task.objects.get(id=task_id)
+        serializer.save(author=self.request.user, task=task)
 
 
 class CommentsDetailView(DestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_url_kwarg = "comment_id"
+    permission_classes = [IsCommentAuthor]

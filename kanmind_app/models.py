@@ -116,7 +116,9 @@ class Task(models.Model):
     )
 
 
+# there should be some connetcion between Comments and Tasks , despite author to make it possible to count(), otherwise it would be to complicated to make such easy method count()
 class Comment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")

@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
+from rest_framework.generics import UpdateAPIView
 
 from kanmind_app.models import Board, Comment, Task
 
@@ -132,6 +133,7 @@ class TaskSerializer(serializers.ModelSerializer):
     # Nested users for read
     assignee = UserSerializer(read_only=True)
     reviewer = UserSerializer(read_only=True)
+    comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -148,8 +150,12 @@ class TaskSerializer(serializers.ModelSerializer):
             "assignee",
             "reviewer",
             "created_by",
+            "comments_count",
         ]
         read_only_fields = ["created_by"]
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
 
 
 class TaskDetailSerializer(TaskSerializer):
@@ -209,8 +215,12 @@ class EmailFilterSerializer(serializers.Serializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = "__all__"
-        read_only_fields = ["author", "task"]
+        read_only_fields = ["author", "task", "created_at"]
+
+    def get_author(self, obj):
+        return obj.author.fullname
