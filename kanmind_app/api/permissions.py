@@ -61,6 +61,4 @@ class IsBoardMemberForTaskComments(BasePermission):
 class IsCommentAuthor(BasePermission):
     def has_object_permission(self, request, view, obj):
 
-        print("obj.author = ", obj.author)
-        print("request.user = ", request.user)
         return obj.author == request.user
