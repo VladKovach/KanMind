@@ -160,12 +160,13 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class TaskDetailSerializer(TaskSerializer):
 
-    class Meta:
-        model = Task
-        fields = "__all__"
+    class Meta(TaskSerializer.Meta):
+        # Inherits all fields from TaskSerializer
         read_only_fields = [
-            "board"
+            "board",
+            "created_by",
         ]  # in Aufgabe steht gar kein board , aber read oonly geht glaube ich um zu versehen
+        # assignee_id, reviewer_id already inherited ✅
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
@@ -219,7 +220,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = "__all__"
+        fields = ["id", "created_at", "author", "content", "task"]
         read_only_fields = ["author", "task", "created_at"]
 
     def get_author(self, obj):
