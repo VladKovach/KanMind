@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 
 import dj_database_url
-from django.conf.global_settings import CSRF_TRUSTED_ORIGINS
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -36,7 +35,6 @@ DEBUG = True
 # settings.py
 
 CSRF_TRUSTED_ORIGINS = ["https://kanmind.onrender.com", "https://vladkovach.github.io/"]
-CORS_ALLOW_CREDENTIALS = True
 
 
 # Application definition
@@ -66,17 +64,21 @@ MIDDLEWARE = [
 ]
 
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS", "localhost,127.0.0.1,kanmind.onrender.com"
+).split(",")
 # Database - Render PostgreSQL
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"), conn_max_age=600
+        default=os.environ.get("DATABASE_URL"), conn_max_age=600, ssl_require=True
     )
 }
 CORS_ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ALLOWED_ORIGINS", "http://localhost:5500"
+    "CORS_ALLOWED_ORIGINS", "http://localhost:5500,https://vladkovach.github.io"
 ).split(",")
+
+CORS_ALLOW_CREDENTIALS = False
+
 
 ROOT_URLCONF = "core.urls"
 
