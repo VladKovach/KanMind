@@ -47,7 +47,9 @@ class RegistrationView(APIView):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token, _ = Token.objects.get_or_create(user=user)  # optional: token auth
+            token, _ = Token.objects.get_or_create(
+                user=user
+            )  # optional: token auth
             return Response(
                 {
                     "token": token.key,
@@ -129,7 +131,9 @@ class EmailCheckView(ListAPIView):
 
     def get_queryset(self):
         # Validate ALL query params at once
-        filter_serializer = EmailFilterSerializer(data=self.request.query_params)
+        filter_serializer = EmailFilterSerializer(
+            data=self.request.query_params
+        )
         filter_serializer.is_valid(raise_exception=True)
 
         email = filter_serializer.validated_data["email"]

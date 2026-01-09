@@ -26,7 +26,8 @@ class IsBoardOwnerOrMember(BasePermission):
             return obj.owner == request.user
 
         return (
-            obj.members.filter(pk=request.user.pk).exists() or obj.owner == request.user
+            obj.members.filter(pk=request.user.pk).exists()
+            or obj.owner == request.user
         )
 
 
@@ -39,7 +40,10 @@ class IsTaskCreatorOrBoardOwnerOrBoardMember(BasePermission):
             return obj.created_by == user or obj.board.owner == user
 
         # any board member or owner can view/update:
-        return obj.board.owner == user or obj.board.members.filter(pk=user.pk).exists()
+        return (
+            obj.board.owner == user
+            or obj.board.members.filter(pk=user.pk).exists()
+        )
 
 
 class IsBoardMemberForTaskComments(BasePermission):

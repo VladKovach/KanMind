@@ -21,15 +21,23 @@ urlpatterns = [
     path("email-check/", EmailCheckView.as_view(), name="email-check"),
     path("users/", UsersList.as_view(), name="users-list"),
     path("boards/", BoardListCreateView.as_view(), name="boards-list"),
-    path("boards/<int:board_id>/", BoardDetailView.as_view(), name="boards-list"),
+    path(
+        "boards/<int:board_id>/", BoardDetailView.as_view(), name="boards-list"
+    ),
     path("tasks/", TaskListCreateView.as_view(), name="tasks-list"),
-    path("tasks/<int:task_id>/", TaskDetailView.as_view(), name="tasks-detail"),
+    path(
+        "tasks/<int:task_id>/", TaskDetailView.as_view(), name="tasks-detail"
+    ),
     path(
         "tasks/assigned-to-me/",
         AssignedToUserTasksView.as_view(),
         name="assigned-to-user",
     ),
-    path("tasks/reviewing/", UserIsReviewingTasksView.as_view(), name="user-reviewing"),
+    path(
+        "tasks/reviewing/",
+        UserIsReviewingTasksView.as_view(),
+        name="user-reviewing",
+    ),
     path(
         "tasks/<int:task_id>/comments/",
         CommentsListCreateView.as_view(),

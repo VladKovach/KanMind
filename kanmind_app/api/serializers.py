@@ -1,3 +1,5 @@
+from typing import AnyStr
+
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 from rest_framework.generics import UpdateAPIView
@@ -52,7 +54,9 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        user = authenticate(email=attrs.get("email"), password=attrs.get("password"))
+        user = authenticate(
+            email=attrs.get("email"), password=attrs.get("password")
+        )
 
         if not user:
             raise serializers.ValidationError("Invalid credentials")
@@ -165,12 +169,15 @@ class TaskDetailSerializer(TaskSerializer):
         read_only_fields = [
             "board",
             "created_by",
-        ]  # in Aufgabe steht gar kein board , aber read oonly geht glaube ich um zu versehen
-        # assignee_id, reviewer_id already inherited ✅
+        ]
+        # in Aufgabe steht gar kein board , aber read oonly geht glaube ich um zu versehen
+        # # assignee_id, reviewer_id already inherited ✅
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
-    members = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
+    members = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all()
+    )
 
     owner_id = serializers.IntegerField(source="owner.id", read_only=True)
     tasks = TaskSerializer(many=True, read_only=True)
@@ -180,7 +187,9 @@ class BoardDetailSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         # Replace plain member IDs with full UserSerializer objects
         if instance.members.exists():
-            data["members"] = UserSerializer(instance.members.all(), many=True).data
+            data["members"] = UserSerializer(
+                instance.members.all(), many=True
+            ).data
         return data
 
     def validate(self, attrs):

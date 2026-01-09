@@ -84,13 +84,19 @@ class Task(models.Model):
         ("high", "High"),
     ]
 
-    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name="tasks")
+    board = models.ForeignKey(
+        Board, on_delete=models.CASCADE, related_name="tasks"
+    )
     title = models.CharField(max_length=255)
     description = models.TextField()
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="to-do")
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="to-do"
+    )
 
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, blank=True)
+    priority = models.CharField(
+        max_length=10, choices=PRIORITY_CHOICES, blank=True
+    )
     assignee = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -116,9 +122,15 @@ class Task(models.Model):
     )
 
 
-# there should be some connetcion between Comments and Tasks , despite author to make it possible to count(), otherwise it would be to complicated to make such easy method count()
+# there should be some connetcion between Comments and Tasks ,
+# despite author to make it possible to count(), otherwise it would
+# be to complicated to make such easy method count()
 class Comment(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name="comments"
+    )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="comments"
+    )
