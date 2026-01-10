@@ -13,42 +13,42 @@
 ### Option 2: Run Locally
 Follow these steps to clone, setup, and run the development server.
 
-#### Step 1: Clone Repository
+## Step 1: Clone Repository
 ```
 git clone https://github.com/VladKovach/KanMind.git
 cd KanMind
 ```
-Step 2: Create Virtual Environment & Install Dependencies
-# Create venv
+## Step 2: Create Virtual Environment & Install Dependencies
+### Create venv
 ```
 python -m venv venv
 ```
-# Activate (Windows)
+### Activate (Windows)
 ```
 venv\Scripts\activate
 ```
-# Activate (Linux/macOS)
+### Activate (Linux/macOS)
 ```
 source venv/bin/activate
 ```
-# Install deps
+### Install deps
 ```
 pip install -r requirements.txt
 ```
-Step 3: Environment Setup
-# Copy .env
+## Step 3: Environment Setup
+### Copy .env
 ```
 cp .env.template .env
 ```
 
-Step 4: Database & Migrations
-# Apply migrations 
+## Step 4: Database & Migrations
+### Apply migrations 
 ```
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-Step 6: Run Development Server
+## Step 6: Run Development Server
 ```
 python manage.py runserver
 ```
