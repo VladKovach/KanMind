@@ -37,9 +37,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-# Boards Models
-
-
 class Board(models.Model):
     owner = models.ForeignKey(
         User,
@@ -122,9 +119,6 @@ class Task(models.Model):
     )
 
 
-# there should be some connetcion between Comments and Tasks ,
-# despite author to make it possible to count(), otherwise it would
-# be to complicated to make such easy method count()
 class Comment(models.Model):
     task = models.ForeignKey(
         Task, on_delete=models.CASCADE, related_name="comments"

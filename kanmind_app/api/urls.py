@@ -12,14 +12,12 @@ from kanmind_app.api.views import (
     TaskDetailView,
     TaskListCreateView,
     UserIsReviewingTasksView,
-    UsersList,
 )
 
 urlpatterns = [
     path("registration/", RegistrationView.as_view(), name="register"),
     path("login/", LoginView.as_view(), name="login"),
     path("email-check/", EmailCheckView.as_view(), name="email-check"),
-    path("users/", UsersList.as_view(), name="users-list"),
     path("boards/", BoardListCreateView.as_view(), name="boards-list"),
     path(
         "boards/<int:board_id>/", BoardDetailView.as_view(), name="boards-list"

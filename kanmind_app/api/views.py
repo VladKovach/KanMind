@@ -9,7 +9,6 @@ from rest_framework.generics import (
     DestroyAPIView,
     ListAPIView,
     ListCreateAPIView,
-    RetrieveAPIView,
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import AllowAny
@@ -79,11 +78,6 @@ class LoginView(APIView):
                 }
             )
         return Response(serializer.errors, status=400)
-
-
-class UsersList(ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
 
 
 # Boards
