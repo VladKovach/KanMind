@@ -8,7 +8,7 @@
 
 **Notes**:
 - Backend expires **January 28, 2026**.
-- Free Render tier is slow: **First request takes up to 30 seconds** (cold start/build trigger).
+- Free Render tier is slow: **First request takes up to 60 seconds** (cold start/build trigger).
 - Subsequent requests faster (~few seconds).
 
 ### Option 2: Run Locally
