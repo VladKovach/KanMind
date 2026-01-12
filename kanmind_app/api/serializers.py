@@ -1,3 +1,4 @@
+import re
 from typing import AnyStr
 
 from django.contrib.auth import authenticate, get_user_model
@@ -32,6 +33,18 @@ class RegistrationSerializer(serializers.ModelSerializer):
         if attrs["password"] != attrs["repeated_password"]:
             raise serializers.ValidationError(
                 {"repeated_password": "Passwords do not match."}
+            )
+        fullname = attrs["fullname"]
+        if not fullname:
+            raise serializers.ValidationError(
+                {"fullname": "Fullname is required!"}
+            )
+
+        # Strict: exactly one space between two words
+        stripped = fullname.strip()
+        if not re.match(r"^[a-zA-Z]+ [a-zA-Z]+$", stripped):
+            raise serializers.ValidationError(
+                {"fullname": "Fullname is incorrect!"}
             )
 
         return attrs
