@@ -1,14 +1,15 @@
 
 ## Quick Start
 
-### Option 1: Try Online Demo (Recommended for Testing)
-- **Frontend**: [https://vladkovach.github.io/kan_mind/](https://vladkovach.github.io/kan_mind/) (GitHub Pages)
-- **Backend API**: [https://kanmind.onrender.com/api/](https://kanmind.onrender.com/api/) (Render free tier)
+### Option 1: Online (Please read the notes before accessing Frontend or Backend API)
+
+- **Frontend**: [https://vladkovach.github.io/kan_mind/] (a private repository deployed on GitHub Pages and connected to the backend API)
+- **Backend API**: [https://kanmind.onrender.com/api/] (Render free tier)
 
 **Notes**:
 - Backend expires **January 28, 2026**.
-- Free Render tier is slow: **First request takes up to 30 seconds** (cold start/build trigger).
-- Subsequent requests faster (~few seconds) [web:84].
+- Free Render tier is slow: **First request takes up to 60 seconds** (cold start/build trigger).
+- Subsequent requests faster (~few seconds).
 
 ### Option 2: Run Locally
 Follow these steps to clone, setup, and run the development server.
@@ -18,37 +19,37 @@ Follow these steps to clone, setup, and run the development server.
 git clone https://github.com/VladKovach/KanMind.git
 cd KanMind
 ```
-Step 2: Create Virtual Environment & Install Dependencies
-# Create venv
+#### Step 2: Create Virtual Environment & Install Dependencies
+##### Create venv
 ```
 python -m venv venv
 ```
-# Activate (Windows)
+##### Activate (Windows)
 ```
 venv\Scripts\activate
 ```
-# Activate (Linux/macOS)
+##### Activate (Linux/macOS)
 ```
 source venv/bin/activate
 ```
-# Install deps
+##### Install deps
 ```
 pip install -r requirements.txt
 ```
-Step 3: Environment Setup
-# Copy .env
+#### Step 3: Environment Setup
+##### Copy .env
 ```
 cp .env.template .env
 ```
 
-Step 4: Database & Migrations
-# Apply migrations 
+#### Step 4: Database & Migrations
+##### Apply migrations 
 ```
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-Step 6: Run Development Server
+#### Step 6: Run Development Server
 ```
 python manage.py runserver
 ```
