@@ -1,5 +1,4 @@
 import re
-from typing import AnyStr
 
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
@@ -51,10 +50,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop("repeated_password")
         return User.objects.create_user(**validated_data)
-
-
-from django.contrib.auth import authenticate
-from rest_framework import serializers
 
 
 class LoginSerializer(serializers.Serializer):
@@ -130,7 +125,9 @@ class BoardListSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    # IDs for write
+
+    board = serializers.PrimaryKeyRelatedField(queryset=Board.objects.all())
+
     assignee_id = serializers.PrimaryKeyRelatedField(
         source="assignee",
         queryset=User.objects.all(),
@@ -182,8 +179,6 @@ class TaskDetailSerializer(TaskSerializer):
             "board",
             "created_by",
         ]
-        # in Aufgabe steht gar kein board , aber read oonly geht glaube ich um zu versehen
-        # # assignee_id, reviewer_id already inherited ✅
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
@@ -218,9 +213,6 @@ class BoardDetailSerializer(serializers.ModelSerializer):
 
 class EmailFilterSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
-
-# Comments
 
 
 class CommentSerializer(serializers.ModelSerializer):

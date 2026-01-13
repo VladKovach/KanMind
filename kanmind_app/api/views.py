@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.http import Http404
-from django.tasks import task
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
@@ -11,13 +9,13 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from kanmind_app.api.permissions import (
-    IsBoardMemberForBoards,
     IsBoardMemberForTaskComments,
+    IsBoardMemberForTasks,
     IsBoardOwnerOrMember,
     IsCommentAuthor,
     IsTaskCreatorOrBoardOwnerOrBoardMember,
@@ -106,7 +104,7 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
 class TaskListCreateView(ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsBoardMemberForBoards]
+    permission_classes = [IsAuthenticated, IsBoardMemberForTasks]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -165,7 +163,7 @@ class UserIsReviewingTasksView(ListAPIView):
 class CommentsListCreateView(ListCreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsBoardMemberForTaskComments]
+    permission_classes = [IsAuthenticated, IsBoardMemberForTaskComments]
 
     def get_queryset(self):
         task_id = self.kwargs["task_id"]
@@ -181,4 +179,4 @@ class CommentsDetailView(DestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_url_kwarg = "comment_id"
-    permission_classes = [IsCommentAuthor]
+    permission_classes = [IsAuthenticated, IsCommentAuthor]

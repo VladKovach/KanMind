@@ -1,23 +1,8 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from kanmind_app.models import Board, Task
-
-
-class IsBoardMemberForBoards(BasePermission):
-
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-
-        board_id = request.data.get("board")
-        if board_id is None:
-            return True  # to allow serializer handle errors
-
-        return Board.objects.filter(
-            Q(id=board_id),
-            Q(owner=request.user) | Q(members=request.user),
-        ).exists()
 
 
 class IsBoardOwnerOrMember(BasePermission):
@@ -29,6 +14,26 @@ class IsBoardOwnerOrMember(BasePermission):
             obj.members.filter(pk=request.user.pk).exists()
             or obj.owner == request.user
         )
+
+
+class IsBoardMemberForTasks(BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        board_id = request.data.get("board")
+        get_object_or_404(Board, id=board_id)
+
+        if board_id is None:
+            return True  # to allow serializer handle errors
+        try:
+            board_id = int(board_id)
+            return Board.objects.filter(
+                Q(id=board_id), Q(owner=request.user) | Q(members=request.user)
+            ).exists()
+        except (ValueError, TypeError):
+            return True
 
 
 class IsTaskCreatorOrBoardOwnerOrBoardMember(BasePermission):
@@ -50,6 +55,8 @@ class IsBoardMemberForTaskComments(BasePermission):
 
     def has_permission(self, request, view):
         task_id = view.kwargs.get("task_id")
+        get_object_or_404(Task, id=task_id)
+
         try:
             task = Task.objects.get(id=task_id)
         except Task.DoesNotExist:
