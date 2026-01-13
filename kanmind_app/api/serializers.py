@@ -3,7 +3,6 @@ from typing import AnyStr
 
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
-from rest_framework.generics import UpdateAPIView
 
 from kanmind_app.models import Board, Comment, Task
 
@@ -188,22 +187,9 @@ class TaskDetailSerializer(TaskSerializer):
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
-    members = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=User.objects.all()
-    )
 
-    owner_id = serializers.IntegerField(source="owner.id", read_only=True)
-    tasks = TaskSerializer(many=True, read_only=True)
-
-    # Custom representation for members on output
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # Replace plain member IDs with full UserSerializer objects
-        if instance.members.exists():
-            data["members"] = UserSerializer(
-                instance.members.all(), many=True
-            ).data
-        return data
+    owner_data = UserSerializer(source="owner", read_only=True)
+    members_data = UserSerializer(source="members", many=True, read_only=True)
 
     def validate(self, attrs):
         owner = self.context["request"].user
@@ -227,7 +213,7 @@ class BoardDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ["id", "title", "owner_id", "members", "tasks"]
+        fields = ["id", "title", "owner_data", "members_data"]
 
 
 class EmailFilterSerializer(serializers.Serializer):
