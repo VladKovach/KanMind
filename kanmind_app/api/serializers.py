@@ -9,14 +9,21 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Basic user serializer for read operations.
+
+    Used in nested representations (board owners, task assignees).
+    """
+
     class Meta:
         model = User
         fields = ["id", "email", "fullname"]
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user registration
+    """User registration with password confirmation and fullname validation.
+
+    Input: email, password, repeated_password, fullname
+    Validates: password match, fullname format (First Last exactly)
     """
 
     repeated_password = serializers.CharField(write_only=True)
@@ -27,18 +34,19 @@ class RegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def validate(self, attrs):
-        # Check password match
+        # Password confirmation check
         if attrs["password"] != attrs["repeated_password"]:
             raise serializers.ValidationError(
                 {"repeated_password": "Passwords do not match."}
             )
+
         fullname = attrs["fullname"]
         if not fullname:
             raise serializers.ValidationError(
                 {"fullname": "Fullname is required!"}
             )
 
-        # Strict: exactly one space between two words
+        # Fullname format: exactly one space between two words, no digits
         stripped = fullname.strip()
         if not re.match(r"^[a-zA-Z]+ [a-zA-Z]+$", stripped):
             raise serializers.ValidationError(
@@ -48,19 +56,19 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Remove confirmation field before user creation
         validated_data.pop("repeated_password")
         return User.objects.create_user(**validated_data)
 
 
 class LoginSerializer(serializers.Serializer):
-    """
-    Serializer for user login
-    """
+    """Custom login serializer using email/password authentication."""
 
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
+        # Attempt authentication with email/password
         user = authenticate(
             email=attrs.get("email"), password=attrs.get("password")
         )
@@ -68,13 +76,17 @@ class LoginSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError("Invalid credentials")
 
+        # Store user for view access
         attrs["user"] = user
         return attrs
 
 
 class BoardListSerializer(serializers.ModelSerializer):
-    """
-    Serializer description
+    """Board listing serializer with summary statistics.
+
+    Input: title, members (array of user IDs)
+    Output: Includes counts for quick overview
+    Prevents duplicate board titles per owner.
     """
 
     owner_id = serializers.IntegerField(source="owner.id", read_only=True)
@@ -100,6 +112,7 @@ class BoardListSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
+        """Prevent owner from creating multiple boards with same title."""
         owner = self.context["request"].user
         title = attrs.get("title")
 
@@ -125,6 +138,11 @@ class BoardListSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    """Task operations with dual input/output user representations.
+
+    Input IDs: assignee_id, reviewer_id (write_only)
+    Output objects: assignee, reviewer (read_only nested serializers)
+    """
 
     board = serializers.PrimaryKeyRelatedField(queryset=Board.objects.all())
 
@@ -143,7 +161,7 @@ class TaskSerializer(serializers.ModelSerializer):
         write_only=True,
     )
     created_by = UserSerializer(read_only=True)
-    # Nested users for read
+    # Nested users for read operations
     assignee = UserSerializer(read_only=True)
     reviewer = UserSerializer(read_only=True)
     comments_count = serializers.SerializerMethodField()
@@ -172,6 +190,11 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class TaskDetailSerializer(TaskSerializer):
+    """Extended task serializer for detail views.
+
+    Inherits all TaskSerializer fields + additional read-only fields for updates.
+    Prevents board changes after creation.
+    """
 
     class Meta(TaskSerializer.Meta):
         # Inherits all fields from TaskSerializer
@@ -182,18 +205,24 @@ class TaskDetailSerializer(TaskSerializer):
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
+    """Detailed board view with nested user representations.
+
+    Output: Full owner/member user objects instead of IDs
+    Prevents title conflicts on updates (excludes current instance).
+    """
 
     owner_data = UserSerializer(source="owner", read_only=True)
     members_data = UserSerializer(source="members", many=True, read_only=True)
 
     def validate(self, attrs):
+        """Title validation for updates (PATCH/PUT)."""
         owner = self.context["request"].user
         title = attrs.get("title")
 
         if title:  # Only validate if title is provided (PATCH might omit it)
             queryset = Board.objects.filter(owner=owner, title=title)
 
-            # Exclude current instance on updates (PUT/PATCH)
+            # Exclude current instance on updates to allow same title
             if self.instance:
                 queryset = queryset.exclude(pk=self.instance.pk)
 
@@ -212,10 +241,21 @@ class BoardDetailSerializer(serializers.ModelSerializer):
 
 
 class EmailFilterSerializer(serializers.Serializer):
+    """Simple serializer for validating email query parameters.
+
+    Used in EmailCheckView for ?email=... queries.
+    """
+
     email = serializers.EmailField()
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Task comment serializer.
+
+    Author shown as fullname only.
+    Author, task, created_at are read-only.
+    """
+
     author = serializers.SerializerMethodField()
 
     class Meta:
@@ -224,4 +264,5 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ["author", "task", "created_at"]
 
     def get_author(self, obj):
+        """Return author's fullname instead of full user object."""
         return obj.author.fullname
