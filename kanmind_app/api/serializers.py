@@ -174,14 +174,14 @@ class TaskSerializer(serializers.ModelSerializer):
             "description",
             "status",
             "priority",
+            "assignee",
+            "reviewer",
             "due_date",
+            "comments_count",
             "board",
             "assignee_id",
             "reviewer_id",
-            "assignee",
-            "reviewer",
             "created_by",
-            "comments_count",
         ]
         read_only_fields = ["created_by"]
 
@@ -204,6 +204,29 @@ class TaskDetailSerializer(TaskSerializer):
         ]
 
 
+class BoardFullSerializer(serializers.ModelSerializer):
+    """Full board detail with nested tasks for GET requests."""
+
+    owner_id = serializers.IntegerField(source="owner.id", read_only=True)
+    members = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all()
+    )
+    tasks = TaskSerializer(many=True, read_only=True)  # Nested tasks
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Replacing plain member IDs with full UserSerializer objects
+        if instance.members.exists():
+            data["members"] = UserSerializer(
+                instance.members.all(), many=True
+            ).data
+        return data
+
+    class Meta:
+        model = Board
+        fields = ["id", "title", "owner_id", "members", "tasks"]
+
+
 class BoardDetailSerializer(serializers.ModelSerializer):
     """Detailed board view with nested user representations.
 
@@ -211,6 +234,9 @@ class BoardDetailSerializer(serializers.ModelSerializer):
     Prevents title conflicts on updates (excludes current instance).
     """
 
+    members = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all(), write_only=True
+    )
     owner_data = UserSerializer(source="owner", read_only=True)
     members_data = UserSerializer(source="members", many=True, read_only=True)
 
@@ -237,7 +263,7 @@ class BoardDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ["id", "title", "owner_data", "members_data"]
+        fields = ["id", "title", "owner_data", "members_data", "members"]
 
 
 class EmailFilterSerializer(serializers.Serializer):

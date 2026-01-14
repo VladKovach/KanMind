@@ -24,6 +24,7 @@ from kanmind_app.models import Board, Comment, Task
 
 from .serializers import (
     BoardDetailSerializer,
+    BoardFullSerializer,
     BoardListSerializer,
     CommentSerializer,
     EmailFilterSerializer,
@@ -113,9 +114,15 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
     """
 
     queryset = Board.objects.all()
-    serializer_class = BoardDetailSerializer
     permission_classes = [IsAuthenticated, IsBoardOwnerOrMember]
     lookup_url_kwarg = "board_id"
+
+    def get_serializer_class(self):
+        # GET → extended serializer
+        if self.request.method == "GET":
+            return BoardFullSerializer
+        # PATCH/PUT/DELETE → normal serializer
+        return BoardDetailSerializer
 
 
 class TaskListCreateView(ListCreateAPIView):
