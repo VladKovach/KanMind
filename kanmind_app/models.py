@@ -118,6 +118,9 @@ class Task(models.Model):
         on_delete=models.CASCADE,
     )
 
+    def __str__(self):
+        return self.title
+
 
 class Comment(models.Model):
     task = models.ForeignKey(

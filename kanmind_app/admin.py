@@ -24,7 +24,6 @@ class UserAdmin(UserAdmin):
 class BoardAdmin(admin.ModelAdmin):
     list_display = ("title", "owner", "created_at")
     list_filter = ("owner",)
-    raw_id_fields = ("owner", "members")
 
 
 @admin.register(Task)
@@ -38,7 +37,14 @@ class TaskAdmin(admin.ModelAdmin):
         "due_date",
     )
     list_filter = ("status", "priority", "board")
-    raw_id_fields = ("board", "assignee", "reviewer", "created_by")
 
 
-admin.site.register(Comment)
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        "task",
+        "content",
+        "created_at",
+        "author",
+    )
+    list_filter = ("created_at",)
