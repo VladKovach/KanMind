@@ -40,7 +40,6 @@ class IsTaskCreatorOrBoardOwnerOrBoardMember(BasePermission):
     def has_object_permission(self, request, view, obj):
         user = request.user
 
-        # DELETE: only task.creator or board.owner
         if request.method == "DELETE":
             return obj.created_by == user or obj.board.owner == user
 

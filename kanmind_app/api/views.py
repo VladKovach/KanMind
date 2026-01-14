@@ -113,7 +113,10 @@ class TaskListCreateView(ListCreateAPIView):
 class TaskDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskDetailSerializer
-    permission_classes = [IsTaskCreatorOrBoardOwnerOrBoardMember]
+    permission_classes = [
+        IsAuthenticated,
+        IsTaskCreatorOrBoardOwnerOrBoardMember,
+    ]
     lookup_url_kwarg = "task_id"
 
 
