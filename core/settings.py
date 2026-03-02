@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.conf.global_settings import STATIC_ROOT
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -140,7 +141,7 @@ USE_TZ = True
 
 
 STATIC_URL = "static/"
-
+STATIC_ROOT = "/var/www/KanMind/static/"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
