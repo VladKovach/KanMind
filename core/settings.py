@@ -36,11 +36,9 @@ DEBUG = os.getenv("DEBUG")
 # settings.py
 
 CSRF_TRUSTED_ORIGINS = [
+    "https://kanmind-api.vladkovach.com",
     "https://vladkovach.github.io",
-    "http://178.104.7.243",
-    "http://178.104.7.243:8000",
 ]
-
 
 # Application definition
 
