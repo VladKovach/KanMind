@@ -35,8 +35,9 @@ DEBUG = os.getenv("DEBUG")
 # settings.py
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://kanmind.onrender.com",
-    "https://vladkovach.github.io/",
+    "https://vladkovach.github.io",
+    "http://178.104.7.243",
+    "http://178.104.7.243:8000",
 ]
 
 
@@ -72,12 +73,10 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(",")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
-    # Production (Render PostgreSQL)
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,  # ← Safe for PostgreSQL
         )
     }
 else:
