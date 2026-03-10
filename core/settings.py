@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 
 import dj_database_url
-from django.conf.global_settings import STATIC_ROOT
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -147,6 +146,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "50/day",
+        "user": "50/day",
+    },
 }
 
 
