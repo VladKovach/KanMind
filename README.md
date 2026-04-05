@@ -1,17 +1,10 @@
 ## Quick Start
 
-### Option 1: Online (Please read the notes before accessing Frontend or Backend API)
+### Live:
 
-- **Frontend**: [https://vladkovach.github.io/kan_mind/] (a private repository deployed on GitHub Pages and connected to the backend API)
-- **Backend API**: [https://kanmind.onrender.com/api/] (Render free tier)
+- https://kanmind.vladkovach.com
 
-**Notes**:
-
-- Backend expires **January 28, 2026**.
-- Free Render tier is slow: **First request takes up to 60 seconds** (cold start/build trigger).
-- Subsequent requests faster (~few seconds).
-
-### Option 2: Run Locally
+### Run Locally
 
 Follow these steps to clone, setup, and run the development server.
 
